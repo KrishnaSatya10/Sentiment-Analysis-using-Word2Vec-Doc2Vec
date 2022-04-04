@@ -60,8 +60,7 @@ def main():
 
     # Using saved models and vectors for method == 'd2v'. (Orginal runtime = 10 mins; Current runtime = 10 seconds)
     if method == "d2v":
-        train_pos_vec, train_neg_vec, test_pos_vec, test_neg_vec = feature_vecs_DOC(
-            train_pos, train_neg, test_pos, test_neg)
+        train_pos_vec, train_neg_vec, test_pos_vec, test_neg_vec = feature_vecs_DOC(train_pos, train_neg, test_pos, test_neg)
         filename = './'+path_to_data+'train_pos_vec_d2v.txt'
         pickle.dump(train_pos_vec, open(filename, 'wb'))
         train_pos_vec = pickle.load(open(filename, 'rb'))
@@ -84,26 +83,25 @@ def main():
         lr_model = pickle.load(open(filename, 'rb'))
 
     if method == "w2v":
-        train_pos_vec, train_neg_vec, test_pos_vec, test_neg_vec = feature_vecs_DOC_W2V(
-            train_pos, train_neg, test_pos, test_neg)
+        #train_pos_vec, train_neg_vec, test_pos_vec, test_neg_vec = feature_vecs_DOC_W2V(train_pos, train_neg, test_pos, test_neg)
         filename = './'+path_to_data+'train_pos_vec_w2v.txt'
-        pickle.dump(train_pos_vec, open(filename, 'wb'))
-        train_pos_vec = pickle.load(open(filename, 'rb'))
+        #pickle.dump(train_pos_vec, open(filename, 'wb'))
+        #train_pos_vec = pickle.load(open(filename, 'rb'))
         filename = './'+path_to_data+'train_neg_vec_w2v.txt'
-        pickle.dump(train_neg_vec, open(filename, 'wb'))
-        train_neg_vec = pickle.load(open(filename, 'rb'))
+        # pickle.dump(train_neg_vec, open(filename, 'wb'))
+        # train_neg_vec = pickle.load(open(filename, 'rb'))
         filename = './'+path_to_data+'test_pos_vec_w2v.txt'
-        pickle.dump(test_pos_vec, open(filename, 'wb'))
-        test_pos_vec = pickle.load(open(filename, 'rb'))
+        # pickle.dump(test_pos_vec, open(filename, 'wb'))
+        # test_pos_vec = pickle.load(open(filename, 'rb'))
         filename = './'+path_to_data+'test_neg_vec_w2v.txt'
-        pickle.dump(test_neg_vec, open(filename, 'wb'))
-        test_neg_vec = pickle.load(open(filename, 'rb'))
+        # pickle.dump(test_neg_vec, open(filename, 'wb'))
+        #test_neg_vec = pickle.load(open(filename, 'rb'))
 
-        nb_model, lr_model = build_models_DOC_W2V(train_pos_vec, train_neg_vec)
-        filename = './'+path_to_data+'nb_model_w2v.sav'
-        pickle.dump(nb_model, open(filename, 'wb'))
-        filename = './'+path_to_data+'lr_model_w2v.sav'
-        pickle.dump(lr_model, open(filename, 'wb'))
+        # nb_model, lr_model = build_models_DOC_W2V(train_pos_vec, train_neg_vec)
+        # filename = './'+path_to_data+'nb_model_w2v.sav'
+        # pickle.dump(nb_model, open(filename, 'wb'))
+        # filename = './'+path_to_data+'lr_model_w2v.sav'
+        # pickle.dump(lr_model, open(filename, 'wb'))
 
     print("Naive Bayes")
     print("-----------")
@@ -166,10 +164,8 @@ def feature_vecs_NLP(train_pos, train_neg, test_pos, test_neg):
 
     # YOUR CODE HERE
     def get_word_counts(sentence_list, counts_dict):
-        # Define threshold
         # Remove duplicates and stop words
         # Get word counts in positive and negative contexts
-        threshold = len(sentence_list) * 0.01
         for word_list in sentence_list:
             word_list = list(
                 set([word for word in word_list if word not in stopwords]))
@@ -180,7 +176,7 @@ def feature_vecs_NLP(train_pos, train_neg, test_pos, test_neg):
     train_pos_counts = defaultdict(int)
     train_neg_counts = defaultdict(int)
 
-    # The counts_dict now has count, i.e. the number of sentences, for all unique words of the sentence_list.
+    # The counts_dict now has count, i.e. the number of sentences in which unique words of the sentence_list occur
     # We remove all words from this dictionary which occur less than 1%
     train_pos_counts = get_word_counts(
         train_pos, train_pos_counts)
@@ -235,9 +231,9 @@ def feature_vecs_DOC(train_pos, train_neg, test_pos, test_neg):
         return labelized
 
     labeled_train_pos = labelize_sentences(train_pos, "TRAIN_POS")
-    labeled_train_neg = labelize_sentences(train_pos, "TRAIN_NEG")
-    labeled_test_pos = labelize_sentences(train_pos, "TEST_POS")
-    labeled_test_neg = labelize_sentences(train_pos, "TEST_NEG")
+    labeled_train_neg = labelize_sentences(train_neg, "TRAIN_NEG")
+    labeled_test_pos = labelize_sentences(test_pos, "TEST_POS")
+    labeled_test_neg = labelize_sentences(test_neg, "TEST_NEG")
 
     # Initialize model
     model = Doc2Vec(min_count=1, window=10, size=100,
@@ -445,7 +441,7 @@ def evaluate_model(model, test_pos_vec, test_neg_vec, print_confusion=False):
     # Use the predict function and calculate the true/false positives and true/false negative.
     # YOUR CODE HERE
     X_test = test_pos_vec + test_neg_vec
-    Y_test = ["pos"]*len(test_pos_vec) + ["neg"]*len(test_pos_vec)
+    Y_test = ["pos"]*len(test_pos_vec) + ["neg"]*len(test_neg_vec)
 
     Y_pred_test = model.predict(X_test)
     tp = fp = tn = fn = 0
